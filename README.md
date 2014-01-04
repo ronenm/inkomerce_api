@@ -1,4 +1,6 @@
 inkomerce_api
 =============
 
-InKomerce SAAS API for ruby
+InKomerce API implementation for ruby.
+
+This is a work in progress....

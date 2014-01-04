@@ -129,6 +129,22 @@ SITES = {
       }
       api_call('/global/categories(.:format)',:get,params,add_params)
     end
+    
+    ###################################################################################
+    # get_currencies: Get list of all currnecies supported by InKomerce
+    #
+    # Hashed Parameters: (pass to the add_params hash)
+    #    country (Optional,String): Put part of the country name and all matching currencies will be returned
+    #    country_code (Optional,String): Find currency by country code (two letters)
+    #
+    # Note: country and country_code are mutual exclusive (cannot be used together)
+    ###################################################################################
+    def get_currencies(add_params = nil)
+      params = {
+      }
+      api_call('/global/currencies(.:format)',:get,params,add_params)
+    end
+
   
     ###################################################################################
     # get_image_url: Get an image url
@@ -169,7 +185,7 @@ SITES = {
     #    success_uri (Required,String): The success uri of the store (can be relative to store url or full url)
     #    cancel_uri (Required,String): The cancel uri of the store (can be relative to store url or full url)
     #    currency (Required,String): The default currency of the store
-    #    language (Required,String): The language keyword of the store
+    #    locale (Required,String): The locale keyword of the store
     #######################################################################################
     def self.create(client_id,client_secret,site_type,add_params)
       token_rec = InKomerceAPIV1::TokenGenerator.new(client_id,client_secret,site_type).token
@@ -206,14 +222,19 @@ SITES = {
     def self.connect(uid,token,site_type = :production)
       store = new(token,site_type)
       store.uid = uid
-      store.store_rec = store.get
-      store
+      store.load
     end
-    
+
+    def load
+      self.store_rec = get
+      self
+    end
+
     
     def initialize(token,site_type = :production)
       super(site_type,token)
     end
+  
   
     ###################################################################################
     # token: Automatically generates a new store token and replaces it
@@ -265,7 +286,7 @@ SITES = {
     #    success_uri (Optional,String): The success uri of the store (can be relative to store url or full url)
     #    cancel_uri (Optional,String): The cancel uri of the store (can be relative to store url or full url)
     #    currency (Optional,String): The default currency of the store
-    #    language (Optional,String): The language keyword of the store
+    #    locale (Optional,String): The locale keyword of the store
     #
     ###################################################################################
     def update(add_params = nil)
@@ -646,7 +667,7 @@ SITES = {
     #    success_uri (Required,String): The success uri of the store (can be relative to store url or full url)
     #    cancel_uri (Required,String): The cancel uri of the store (can be relative to store url or full url)
     #    currency (Required,String): The default currency of the store
-    #    language (Required,String): The language keyword of the store
+    #    locale (Required,String): The locale keyword of the store
     #
     ###################################################################################
     def create(add_params = nil)
