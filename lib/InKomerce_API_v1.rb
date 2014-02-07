@@ -186,6 +186,8 @@ SITES = {
     #    cancel_uri (Required,String): The cancel uri of the store (can be relative to store url or full url)
     #    currency (Required,String): The default currency of the store
     #    locale (Required,String): The locale keyword of the store
+    #    logo_uri (Optional,String): A URL of the store logo image
+    #
     #######################################################################################
     def self.create(client_id,client_secret,site_type,add_params)
       token_rec = InKomerceAPIV1::TokenGenerator.new(client_id,client_secret,site_type).token
@@ -287,6 +289,7 @@ SITES = {
     #    cancel_uri (Optional,String): The cancel uri of the store (can be relative to store url or full url)
     #    currency (Optional,String): The default currency of the store
     #    locale (Optional,String): The locale keyword of the store
+    #    logo_uri (Optional,String): A URL of the store logo image
     #
     ###################################################################################
     def update(add_params = nil)
