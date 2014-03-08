@@ -452,7 +452,6 @@ SITES = {
     #    taxonomies_rids (Optional,String): The taxonomies of the product (optional)
     #    sku (Optional,String): The sku (or any other seller's internal identification number). Must be unique!
     #    images_urls (Optional,Array): List of image urls to add to the gallery (it will download the images from the urls)
-    #    allow_override (Optional,Virtus::Attribute::Boolean): Wheather to allow overriding of existing product
     #
     ###################################################################################
     def update_product(rid, add_params = nil)
