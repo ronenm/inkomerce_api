@@ -13,7 +13,8 @@ module InKomerceAPIV1
 
 SITES = {
   test: 'http://new-host:3001/',
-  production: 'http://www.inkomerce.com/'
+  production: 'http://www.inkomerce.com/',
+  stage: 'http://inkomercea103.ninefold-apps.com/'
 }
 
   class TokenGenerator
