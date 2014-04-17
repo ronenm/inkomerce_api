@@ -54,7 +54,7 @@ SITES = {
       self.token = token
     end
   
-    # make a call to the WePay API
+    # make a call to the InKomerce API
     def call(call, method = :get, params = false)
       # get the url
       url = URI.parse(@api_endpoint + call)
@@ -95,8 +95,9 @@ SITES = {
       end
       
       # create the request object
-      request = Net::HTTP.new(url.host, url.port)
-      response = request.start {|http| http.request(call) }
+      response = Net::HTTP.start(url.host, url.port, use_ssl: (url.scheme=='https')) {
+        |http| http.request(call)
+      }
       # returns JSON response as ruby hash
       symbolize_return_record_keys(JSON.parse(response.body))
     end
@@ -165,6 +166,278 @@ SITES = {
 
   end
 
+  class ConversationProxy < Connector
+
+    attr_accessor :uid
+    attr_accessor :conversation_proxy_rec
+
+    def initialize(token,site_type = :production)
+      super(site_type,token)
+    end
+
+    ##########################################################################################################
+    #
+    # Connect to an existing Conversation proxy
+    #
+    # Parameters:
+    #   uid: The unique id of the Conversation proxy
+    #   token: The token of the Conversation proxy
+    #   site_type: :production or :test (defaults to :production)
+    ##########################################################################################################
+    def self.connect(uid,token,site_type = :production)
+      conversation_proxy = new(token,site_type)
+      conversation_proxy.uid = uid
+      conversation_proxy.load
+    end
+
+    def load(rec=nil)
+      self.conversation_proxy_rec = rec || get
+      self
+    end
+    
+    ##################################################################################
+    # Perform all create actions (including getting the token)
+    #
+    # Parameters:
+    #   client_id (String): The id of the client (obtainable from the inkomerce seller back-office)
+    #   client_secret (String): The secret of the site obtained from he inkomerce seller back-office
+    #   site_type (Symbol): :production or :test
+    #
+    # Hashed Parameters: (pass to the add_params hash)
+    #    name (Required,String): A name for the proxy
+    #    notification_mode (Optional,String): The notification mode that will be used by the app. When using push notification, poll is also allowed.
+    #    webhook (Optional,String): The webhook url (must be given when notification_mode is 'push'
+    #    logo_uri (Optional,String): The uri/url for the the app logo. Use empty string to erase the logo.
+    #
+    ###################################################################################
+    def self.create(client_id,client_secret,site_type,add_params)
+      token_rec = InKomerceAPIV1::TokenGenerator.new(client_id,client_secret,site_type).token
+      if token_rec.key?(:error)
+        raise token_rec[:error]
+      end
+      unless token_rec.key?(:access_token)
+        raise "Missing token!"
+      end
+      conversation_proxy = new(token_rec[:access_token],site_type)
+      record = conversation_proxy.send(:create,add_params)
+      unless record.key?(:conversation_proxy) && record[:conversation_proxy].key?(:uid)
+        if record[:error]
+           raise record[:error]
+        else
+          raise 'Unable to create Conversation proxy!'
+        end
+      end
+      conversation_proxy.conversation_proxy_rec = record
+      puts "*** #{record} ****"
+      conversation_proxy.uid = record[:conversation_proxy][:uid]
+      conversation_proxy
+    end
+
+    ###################################################################################
+    # token: Automatically generates a new conversation_proxy token and replaces it
+    #
+    # Parameters:
+    #   client_id (String): The id of the client (obtainable from the inkomerce seller back-office)
+    #   client_secret (String): The secret of the site obtained from he inkomerce seller back-office
+    #
+    ###################################################################################
+    def replace_token(client_id,client_secret)
+      token_rec = InKomerceAPIV1::TokenGenerator.new(client_id,client_secret,site_type).token
+      if token_rec.key?(:error)
+        raise "#{token_rec[:error]}"
+      end
+      unless token_rec.key?(:access_token)
+        raise "Missing token!"
+      end
+      new_token(new_token: token_rec[:access_token])
+    end
+  
+    ###################################################################################
+    # new_token: Change conversation_proxy token (use if token compromised)
+    #
+    # Hashed Parameters: (pass to the add_params hash)
+    #    new_token (Required,String): The new token (obtained through the oauth system)
+    #
+    ###################################################################################
+    def new_token(add_params = nil)
+      params = {
+        uid: uid,
+      }
+      # This is a modification from the autogenerated file
+      # Update the token according to the returned value
+      ret = api_call('/conversation_proxies/:uid/token(.:format)',:post,params,add_params)
+      if ret.key?(:token) && ret[:token].key?(:token)
+        self.token = ret[:token][:token]
+      end
+      ret
+    end
+
+
+    ###################################################################################
+    # update: Update the conversation proxy
+    #
+    # Hashed Parameters: (pass to the add_params hash)
+    #    name (Optional,String): The name of the conversation proxy
+    #    notification_mode (Optional,String): The notification mode that will be used by the app. When using push notification, poll is also allowed.
+    #    webhook (Optional,String): The webhook url (must be given when notification_mode is 'push'
+    #    logo_uri (Optional,String): The uri/url for the the app logo. Use empty string to erase the logo.
+    #
+    ###################################################################################
+    def update(add_params = nil)
+      params = {
+      uid: uid,
+      }
+      api_call('/conversation_proxies/:uid(.:format)',:put,params,add_params)
+    end
+
+
+    ###################################################################################
+    # get: Get the current user proxy
+    #
+    ###################################################################################
+    def get(add_params = nil)
+      params = {
+      uid: uid,
+      }
+      api_call('/conversation_proxies/:uid(.:format)',:get,params,add_params)
+    end
+
+
+    ###################################################################################
+    # create_affinity: Create or get a user affiliation
+    #
+    # Hashed Parameters: (pass to the add_params hash)
+    #    token (Optional,String): A token number for a user that was provided by InKomerce user authentication system
+    #    email_address (Optional,String): An email address that can be used to identify the user
+    #    name (Optional,String): Used to add a descriptive user name when it does not exists (relevant only to email_address)
+    #
+    ###################################################################################
+    def create_affinity(add_params = nil)
+      params = {
+      uid: uid,
+      }
+      api_call('/conversation_proxies/:uid/affinities(.:format)',:post,params,add_params)
+    end
+
+
+    ###################################################################################
+    # initiate_negotiation: Initiate a buyer negotiation
+    #
+    # Hashed Parameters: (pass to the add_params hash)
+    #    kind (Optional,String): The kind of negotiation (sell or buy), buy is the default
+    #    user_affinity_token (Required,String): The user affinity token of the user that is going to initiate the negotiation
+    #    buid (Required,String): The buselftton unique id for the product that is being negotiated for
+    #    initial_bid (Optional,String): The initial bid that is offered to the seller
+    #
+    ###################################################################################
+    def initiate_negotiation(add_params = nil)
+      params = {
+      uid: uid,
+      }
+      api_call('/conversation_proxies/:uid/negotiations/initiate(.:format)',:post,params,add_params)
+    end
+
+
+    ###################################################################################
+    # get_negotiations: Get all negotiations
+    #
+    # Hashed Parameters: (pass to the add_params hash)
+    #    kind (Optional,String): The kind of negotiation (sell or buy), buy is the default
+    #    all (Optional,Virtus::Attribute::Boolean): Take both active and non active negotiations!
+    #
+    ###################################################################################
+    def get_negotiations(add_params = nil)
+      params = {
+      uid: uid,
+      }
+      api_call('/conversation_proxies/:uid/negotiations(.:format)',:get,params,add_params)
+    end
+
+
+    ###################################################################################
+    # get_negotiation: Get the current negotiation status
+    #
+    # Parameters:
+    #    nuid (String): The negotiation id
+    #
+    # Hashed Parameters: (pass to the add_params hash)
+    #    kind (Optional,String): The kind of negotiation (sell or buy), buy is the default
+    #
+    ###################################################################################
+    def get_negotiation(nuid, add_params = nil)
+      params = {
+      uid: uid,
+      nuid: nuid,
+      }
+      api_call('/conversation_proxies/:uid/negotiations/:nuid(.:format)',:get,params,add_params)
+    end
+
+
+    ###################################################################################
+    # get_negotiation_poll: Poll messages for the current negotiation
+    #
+    # Parameters:
+    #    nuid (String): The negotiation id
+    #
+    # Hashed Parameters: (pass to the add_params hash)
+    #    kind (Optional,String): The kind of negotiation (sell or buy), buy is the default
+    #    last_id (Optional,Integer): The id of the last message that was polled. If not set, it will use the internall stored last_id
+    #
+    ###################################################################################
+    def get_negotiation_poll(nuid, add_params = nil)
+      params = {
+      uid: uid,
+      nuid: nuid,
+      }
+      api_call('/conversation_proxies/:uid/negotiations/:nuid/poll(.:format)',:get,params,add_params)
+    end
+
+
+    ###################################################################################
+    # do_negotiation: Perform a transition on the negotiation (ex: bid, accept, checkout etc...)
+    #
+    # Parameters:
+    #    nuid (String): The negotiation id
+    #    transition (String): The transition to perform. Must be one of the transitions that are available.
+    #
+    # Hashed Parameters: (pass to the add_params hash)
+    #    kind (Optional,String): The kind of negotiation (sell or buy), buy is the default
+    #    bid (Optional,String): The bid to perform (required for some of the transitions)
+    #
+    ###################################################################################
+    def do_negotiation(nuid, transition, add_params = nil)
+      params = {
+      uid: uid,
+      nuid: nuid,
+      transition: transition,
+      }
+      api_call('/conversation_proxies/:uid/negotiations/:nuid/:transition(.:format)',:put,params,add_params)
+    end
+
+
+  protected
+
+    ###################################################################################
+    # create: Create a conversation proxy
+    #
+    # Hashed Parameters: (pass to the add_params hash)
+    #    name (Required,String): A name for the proxy
+    #    notification_mode (Optional,String): The notification mode that will be used by the app. When using push notification, poll is also allowed.
+    #    webhook (Optional,String): The webhook url (must be given when notification_mode is 'push'
+    #    logo_uri (Optional,String): The uri/url for the the app logo. Use empty string to erase the logo.
+    #
+    ###################################################################################
+    def create(add_params = nil)
+      params = {
+      }
+      api_call('/conversation_proxies(.:format)',:post,params,add_params)
+    end
+
+
+
+  end
+
+
   class Store < Connector
     
     attr_accessor :store_rec
@@ -175,7 +448,7 @@ SITES = {
     #
     # Parameters:
     #   client_id (String): The id of the client (obtainable from the inkomerce seller back-office)
-    #   client_secret (String): The secret of the site obtained from he inkomerce seller back-office
+    #   client_secret (String): The secret of the site obtained from the inkomerce seller back-office
     #   site_type (Symbol): :production or :test
     #
     # Hashed Parameters: (pass to the add_params hash)
@@ -227,8 +500,8 @@ SITES = {
       store.load
     end
 
-    def load
-      self.store_rec = get
+    def load(rec=nil)
+      self.store_rec = rec || get
       self
     end
 
