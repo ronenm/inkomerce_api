@@ -13,7 +13,7 @@ module InKomerceAPIV1
 
 SITES = {
   test: 'http://new-host:3001/',
-  production: 'http://app.inkomerce.com/',
+  production: 'https://app.inkomerce.com/',
 }
 
   class TokenGenerator
