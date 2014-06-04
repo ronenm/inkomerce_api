@@ -25,10 +25,11 @@ SITES = {
     def token
       path = @url.path + '?' + @url.query
       call = Net::HTTP::Get.new(path)
-      # create the request object
-      request = Net::HTTP.new(@url.host, @url.port)
-      response = request.start(use_ssl: (url.scheme=='https')) {|http| http.request(call) }
-      # returns JSON response as ruby hash
+      
+      response = Net::HTTP.start(@url.host, @url.port, use_ssl: (@url.scheme=='https')) {
+        |http| http.request(call)
+      }
+
       JSON.parse(response.body).deep_symbolize_keys
     end
   end
