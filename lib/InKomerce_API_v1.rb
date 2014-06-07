@@ -200,8 +200,8 @@ SITES = {
     # Perform all create actions (including getting the token)
     #
     # Parameters:
-    #   client_id (String): The id of the client (obtainable from the inkomerce seller back-office)
-    #   client_secret (String): The secret of the site obtained from he inkomerce seller back-office
+    #   client_id (String): The id of the client (obtainable from the inkomerce partner back-office)
+    #   client_secret (String): The secret of the site obtained from he inkomerce partner back-office
     #   site_type (Symbol): :production or :test
     #
     # Hashed Parameters: (pass to the add_params hash)
@@ -238,8 +238,8 @@ SITES = {
     # token: Automatically generates a new conversation_proxy token and replaces it
     #
     # Parameters:
-    #   client_id (String): The id of the client (obtainable from the inkomerce seller back-office)
-    #   client_secret (String): The secret of the site obtained from he inkomerce seller back-office
+    #   client_id (String): The id of the client (obtainable from the inkomerce partner back-office)
+    #   client_secret (String): The secret of the site obtained from he inkomerce partner back-office
     #
     ###################################################################################
     def replace_token(client_id,client_secret)
@@ -448,8 +448,8 @@ SITES = {
     # Perform all create actions (including getting the token)
     #
     # Parameters:
-    #   client_id (String): The id of the client (obtainable from the inkomerce seller back-office)
-    #   client_secret (String): The secret of the site obtained from the inkomerce seller back-office
+    #   client_id (String): The id of the client (obtainable from the inkomerce partner back-office)
+    #   client_secret (String): The secret of the site obtained from the inkomerce partner back-office
     #   site_type (Symbol): :production or :test
     #
     # Hashed Parameters: (pass to the add_params hash)
@@ -542,8 +542,8 @@ SITES = {
     # token: Automatically generates a new store token and replaces it
     #
     # Parameters:
-    #   client_id (String): The id of the client (obtainable from the inkomerce seller back-office)
-    #   client_secret (String): The secret of the site obtained from he inkomerce seller back-office
+    #   client_id (String): The id of the client (obtainable from the inkomerce partner back-office)
+    #   client_secret (String): The secret of the site obtained from he inkomerce partner back-office
     #
     ###################################################################################
     def replace_token(client_id,client_secret)
@@ -613,14 +613,14 @@ SITES = {
   
   
     ###################################################################################
-    # get_seller: Returns current seller
+    # get_partner: Returns current partner
     #
     ###################################################################################
-    def get_seller(add_params = nil)
+    def get_partner(add_params = nil)
       params = {
         uid: uid,
       }
-      api_call('/stores/:uid/seller(.:format)',:get,params,add_params)
+      api_call('/stores/:uid/partner(.:format)',:get,params,add_params)
     end
   
   
