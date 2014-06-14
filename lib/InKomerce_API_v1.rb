@@ -610,19 +610,7 @@ SITES = {
       }
       api_call('/stores/:uid(.:format)',:get,params,add_params)
     end
-  
-  
-    ###################################################################################
-    # get_partner: Returns current partner
-    #
-    ###################################################################################
-    def get_partner(add_params = nil)
-      params = {
-        uid: uid,
-      }
-      api_call('/stores/:uid/partner(.:format)',:get,params,add_params)
-    end
-  
+    
   
     ###################################################################################
     # get_taxonomies: Get taxonomies of the store
@@ -981,6 +969,117 @@ SITES = {
 
 
   end
+
+  class PartnerProxy < Connector
+
+    attr_accessor :uid
+    attr_accessor :partner_record
+
+    def initialize(token,site_type = :production)
+      super(site_type,token)
+    end
+
+    ##########################################################################################################
+    #
+    # Connect to an existing Partner proxy
+    #
+    # Parameters:
+    #   uid: The unique id of the Partner proxy
+    #   token: The token of the Partner proxy
+    #   site_type: :production or :test (defaults to :production)
+    #
+    ##########################################################################################################
+    def self.connect(uid,token,site_type = :production)
+      partner_proxy = new(token,site_type)
+      partner_proxy.uid = uid
+      partner_proxy.load
+    end
+
+    def load
+      self.partner_record = get
+      self
+    end
+
+    ##################################################################################
+    #
+    # Perform all authentication action
+    #
+    # Parameters:
+    #   uid: The unique identifier of the partner (received by email)
+    #   client_id (String): The id of the client (obtainable from the inkomerce seller back-office)
+    #   client_secret (String): The secret of the site obtained from he inkomerce seller back-office
+    #   site_type (Symbol): :production or :test
+    #
+    ###################################################################################
+    def self.authenticate(uid,client_id,client_secret,site_type,add_params=nil)
+      token_rec = InKomerceAPIV1::TokenGenerator.new(client_id,client_secret,site_type).token
+      if token_rec.key?(:error)
+        raise token_rec[:error]
+      end
+      unless token_rec.key?(:access_token)
+        raise "Missing token!"
+      end
+      partner_proxy = new(token_rec[:access_token],site_type)
+      self.uid = uid
+      record = partner_proxy.send(:authenticate,add_params)
+      unless record.key?(:partner)
+        if record[:error]
+           raise record[:error]
+        else
+          raise 'Unable to create Partner proxy!'
+        end
+      end
+      partner_proxy.partner_record = record
+      partner_proxy
+    end
+
+    ###################################################################################
+    # get: Get your partner account's details
+    #
+    ###################################################################################
+    def get(add_params = nil)
+      params = {
+      uid: uid,
+      }
+      api_call('/partner_proxies/:uid(.:format)',:get,params,add_params)
+    end
+
+
+    ###################################################################################
+    # create_affinity: Create or get a user affiliation
+    #
+    # Hashed Parameters: (pass to the add_params hash)
+    #    token (Optional,String): A token number for a user that was provided by InKomerce user authentication system
+    #    email_address (Optional,String): An email address that can be used to identify the user
+    #    name (Optional,String): Used to add a descriptive user name when it does not exists (relevant only to email_address)
+    #
+    ###################################################################################
+    def create_affinity(add_params = nil)
+      params = {
+      uid: uid,
+      }
+      api_call('/partner_proxies/:uid/affinities(.:format)',:post,params,add_params)
+    end
+
+
+  protected
+
+    ###################################################################################
+    # authenticate: Authenticate your partner account
+    #
+    ###################################################################################
+    def authenticate(add_params = nil)
+      params = {
+      uid: uid,
+      }
+      api_call('/partner_proxies/:uid/authenticate(.:format)',:post,params,add_params)
+    end
+
+
+
+  end
+
+
 
     
 end
