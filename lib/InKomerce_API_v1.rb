@@ -172,8 +172,6 @@ SITES = {
     #    buid (String): The button uid
     #
     # Hashed Parameters: (pass to the add_params hash)
-    #    what (Optional,String): What should be retrieved on all product.
-    #                          Available options: "rid" just the pids, "burl", "short" (the default) or "long"
     #    image_style (Optional,String): Set this option to get the url of the images of certain style or all styles.
     #                                   Use '*' or 'all' for all styles.
     #
@@ -273,20 +271,6 @@ SITES = {
       conversation_proxy.conversation_proxy_rec = record
       conversation_proxy.uid = record[:conversation_proxy][:uid]
       conversation_proxy
-    end
-
-    ###################################################################################
-    # token: Change proxy token (use if token compromised)
-    #
-    # Hashed Parameters: (pass to the add_params hash)
-    #    new_token (Required,String): The new token (obtained through the oauth system)
-    #
-    ###################################################################################
-    def token(add_params = nil)
-      params = {
-      uid: uid,
-      }
-      api_call('/conversation_proxies/:uid/token(.:format)',:post,params,add_params)
     end
 
 
@@ -394,10 +378,11 @@ SITES = {
     # initiate_negotiation: Initiate a buyer negotiation
     #
     # Hashed Parameters: (pass to the add_params hash)
-    #    kind (Optional,String): The kind of negotiation (sell or buy), buy is the default
     #    user_affinity_token (Required,String): The user affinity token of the user that is going to initiate the negotiation
     #    buid (Required,String): The button unique id for the product that is being negotiated for
     #    initial_bid (Optional,String): The initial bid that is offered to the seller
+    #    image_style (Optional,String): Set this option to get the url of the images of certain style or all styles.
+    #                                   Use '*' or 'all' for all styles.
     #
     ###################################################################################
     def initiate_negotiation(add_params = nil)
@@ -412,8 +397,9 @@ SITES = {
     # get_negotiations: Get all negotiations
     #
     # Hashed Parameters: (pass to the add_params hash)
-    #    kind (Optional,String): The kind of negotiation (sell or buy), buy is the default
     #    all (Optional,Virtus::Attribute::Boolean): Take both active and non active negotiations!
+    #    image_style (Optional,String): Set this option to get the url of the images of certain style or all styles.
+    #                                   Use '*' or 'all' for all styles.
     #
     ###################################################################################
     def get_negotiations(add_params = nil)
@@ -431,7 +417,8 @@ SITES = {
     #    nuid (String): The negotiation id
     #
     # Hashed Parameters: (pass to the add_params hash)
-    #    kind (Optional,String): The kind of negotiation (sell or buy), buy is the default
+    #    image_style (Optional,String): Set this option to get the url of the images of certain style or all styles.
+    #                                   Use '*' or 'all' for all styles.
     #
     ###################################################################################
     def get_negotiation(nuid, add_params = nil)
@@ -471,8 +458,9 @@ SITES = {
     #    transition (String): The transition to perform. Must be one of the transitions that are available.
     #
     # Hashed Parameters: (pass to the add_params hash)
-    #    kind (Optional,String): The kind of negotiation (sell or buy), buy is the default
     #    bid (Optional,String): The bid to perform (required for some of the transitions)
+    #    image_style (Optional,String): Set this option to get the url of the images of certain style or all styles.
+    #                                   Use '*' or 'all' for all styles.
     #
     ###################################################################################
     def do_negotiation(nuid, transition, add_params = nil)
