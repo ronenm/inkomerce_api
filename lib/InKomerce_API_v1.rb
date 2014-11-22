@@ -16,6 +16,11 @@ SITES = {
   production: 'https://app.inkomerce.com/',
 }
 
+UI_SITES = {
+  test: 'http://new-host:3002/',
+  production: 'https://ui.offerjar.com/'
+}
+
   class TokenGenerator
     def initialize(client_id,client_secret,site_type = :production)
       @url = URI.parse(SITES[site_type] + 'oauth/token')
@@ -53,6 +58,12 @@ SITES = {
       @api_endpoint = SITES[site_type] + 'api/v1'
       self.site_type = site_type
       self.token = token
+    end
+  
+    def ui_url(action,params= false)
+      url = URI.parse(UI_SITES[site_type] + action)
+      url.query = params.keys.map { |key| "#{key}=#{params[key]}"}.join('&') if params.is_a?(Hash)
+      url.path + (url.query ? "?#{url.query}" : '')
     end
   
     # make a call to the InKomerce API
