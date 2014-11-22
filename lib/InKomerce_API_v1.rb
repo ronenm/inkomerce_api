@@ -63,7 +63,7 @@ UI_SITES = {
     def ui_url(action,params= false)
       url = URI.parse(UI_SITES[site_type] + action)
       url.query = params.keys.map { |key| "#{key}=#{params[key]}"}.join('&') if params.is_a?(Hash)
-      url.path + (url.query ? "?#{url.query}" : '')
+      url.to_s
     end
   
     # make a call to the InKomerce API
