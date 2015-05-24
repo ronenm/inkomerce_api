@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name        = 'inkomerce_api'
-  s.version     = '0.1.0'
-  s.date        = '2013-12-26'
+  s.version     = '1.0.0'
+  s.date        = '2015-05-24'
   s.summary     = "InKomerce API"
   s.description = "This Gem includes the InKomerce API V1"
   s.authors     = ["Ronen Moldovan"]

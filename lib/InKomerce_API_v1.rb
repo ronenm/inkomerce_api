@@ -13,7 +13,7 @@ module InKomerceAPIV1
 
 SITES = {
   test: 'http://new-host:3001/',
-  production: 'https://app.inkomerce.com/',
+  production: 'https://app.offerjar.com/',
 }
 
 UI_SITES = {
