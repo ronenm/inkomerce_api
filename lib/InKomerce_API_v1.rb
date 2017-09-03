@@ -13,12 +13,12 @@ module InKomerceAPIV1
 
 SITES = {
   test: 'http://new-host:3001/',
-  production: 'https://app.offerjar.com/',
+  production: 'https://app.offerjar.net/',
 }
 
 UI_SITES = {
   test: 'http://new-host:3002/',
-  production: 'https://ui.offerjar.com/'
+  production: 'https://ui.offerjar.net/'
 }
 
   class TokenGenerator
